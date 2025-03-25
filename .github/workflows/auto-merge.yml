@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - dev  # or the base branch you want to target
+      - main  # or the base branch you're using
 
 jobs:
   auto-merge:
@@ -24,25 +24,27 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
-          git fetch origin main  # Fetch the latest changes from the base branch (adjust if needed)
+          git fetch origin main
           git checkout ${{ github.head_ref }}
           git merge --no-ff origin/main --no-commit || echo "Merge conflicts detected"
 
+      - name: List directory contents
+        run: ls -al  # Debugging step to check the directory contents
+
       - name: Run tests (if applicable)
         run: |
-          # Run your tests here (adjust according to your setup)
-          # For example, using Node.js:
-          npm install
-          npm test
+          cd frontend  # Change to the directory where package.json is located
+          npm install   # Install dependencies
+          npm test       # Run tests
 
       - name: Merge PR if no issues
         if: success() && !contains(github.event.pull_request.body, 'WIP')
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
-          TOKEN=${{ secrets.TOKEN }}
+          TOKEN=${{ secrets.GITHUB_TOKEN }}
           curl -X PUT \
             -H "Authorization: token $TOKEN" \
             -d '{"commit_message": "Auto-merge PR #'"$PR_NUMBER"'", "merge_method": "merge"}' \
             https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/merge
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

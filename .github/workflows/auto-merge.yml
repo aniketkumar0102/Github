@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - main  # or any other branch you want to target
+      - dev  # or any other branch you want to target
 
 jobs:
   auto-merge:

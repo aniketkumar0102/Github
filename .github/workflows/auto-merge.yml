@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - main  # or the base branch you're using
+      - dev  # or the base branch you're using
 
 jobs:
   auto-merge:

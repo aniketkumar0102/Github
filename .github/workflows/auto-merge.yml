@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - dev  # or any other branch you want to target
+      - dev  # or whichever branch you want to target
 
 jobs:
   auto-merge:
@@ -24,20 +24,22 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
-          git fetch origin main
-          git checkout ${{ github.head_ref }}
-          git merge --no-ff origin/main --no-commit || echo "Merge conflicts detected"
+          git fetch origin main  # Make sure we fetch the latest changes from the target branch (dev)
+          git checkout ${{ github.head_ref }}  # Checkout the current branch of the PR
+          git merge --no-ff origin/dev --no-commit || echo "Merge conflicts detected"  # Check for merge conflicts
 
       - name: Merge PR if no conflicts
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           TOKEN=${{ secrets.GITHUB_TOKEN }}
+          
+          # Call GitHub API to merge the PR
           response=$(curl -X PUT \
             -H "Authorization: token $TOKEN" \
             -d '{"commit_message": "Auto-merge PR #'"$PR_NUMBER"'", "merge_method": "merge"}' \
             https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/merge)
 
-          # Debug: Print the API response
+          # Debug: Print the response from GitHub API
           echo "Merge response: $response"
 
         env:

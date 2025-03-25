@@ -1,0 +1,48 @@
+name: Auto Merge Pull Requests
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - main  # or the base branch you want to target
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Check for merge conflicts
+        run: |
+          git fetch origin main  # Fetch the latest changes from the base branch (adjust if needed)
+          git checkout ${{ github.head_ref }}
+          git merge --no-ff origin/main --no-commit || echo "Merge conflicts detected"
+
+      - name: Run tests (if applicable)
+        run: |
+          # Run your tests here (adjust according to your setup)
+          # For example, using Node.js:
+          npm install
+          npm test
+
+      - name: Merge PR if no issues
+        if: success() && !contains(github.event.pull_request.body, 'WIP')
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          TOKEN=${{ secrets.TOKEN }}
+          curl -X PUT \
+            -H "Authorization: token $TOKEN" \
+            -d '{"commit_message": "Auto-merge PR #'"$PR_NUMBER"'", "merge_method": "merge"}' \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/merge
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}

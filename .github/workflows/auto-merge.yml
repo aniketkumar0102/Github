@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - dev
+      - dev  # or any other branch you want to target
 
 jobs:
   auto-merge:
@@ -28,17 +28,7 @@ jobs:
           git checkout ${{ github.head_ref }}
           git merge --no-ff origin/main --no-commit || echo "Merge conflicts detected"
 
-      - name: List all files and directories (for debugging)
-        run: |
-          ls -R  # This will list all files and subdirectories
-
-      - name: Run tests (if applicable)
-        run: |
-          cd client  # Update this to the correct directory after confirming the location
-          npm install   # Install dependencies
-          npm test       # Run tests
-
-      - name: Merge PR if no issues
+      - name: Merge PR if no conflicts
         if: success() && !contains(github.event.pull_request.body, 'WIP')
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}

@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - dev  # or the base branch you're using
+      - dev
 
 jobs:
   auto-merge:
@@ -28,12 +28,13 @@ jobs:
           git checkout ${{ github.head_ref }}
           git merge --no-ff origin/main --no-commit || echo "Merge conflicts detected"
 
-      - name: List directories
-        run: find . -type d  # List all directories to help find the correct location of package.json
+      - name: List all files and directories (for debugging)
+        run: |
+          ls -R  # This will list all files and subdirectories
 
       - name: Run tests (if applicable)
         run: |
-          cd app  # Change to the correct directory
+          cd client  # Update this to the correct directory after confirming the location
           npm install   # Install dependencies
           npm test       # Run tests
 

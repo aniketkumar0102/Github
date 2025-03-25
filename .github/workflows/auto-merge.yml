@@ -7,7 +7,7 @@ on:
       - synchronize
       - reopened
     branches:
-      - dev  # or any other branch you want to target
+      - dev  # or the base branch you want to target
 
 jobs:
   auto-merge:
@@ -24,9 +24,9 @@ jobs:
 
       - name: Check for merge conflicts
         run: |
-          git fetch origin main
+          git fetch origin main  # Fetch the latest changes from the target branch (dev)
           git checkout ${{ github.head_ref }}
-          git merge --no-ff origin/main --no-commit || echo "Merge conflicts detected"
+          git merge --no-ff origin/dev --no-commit || echo "Merge conflicts detected"
 
       - name: Merge PR if no conflicts
         run: |
